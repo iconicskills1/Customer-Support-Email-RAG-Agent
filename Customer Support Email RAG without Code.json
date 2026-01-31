@@ -1,0 +1,749 @@
+{
+  "name": "Customer Support Email RAG",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        512,
+        1168
+      ],
+      "id": "b94863e2-b697-4884-ab08-107ddde225c9",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "=Call this tool to look into company policy and FAQ to answer customer query.",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "DHA-Lahore-Byelaws-updated-on-29-Jul-2025.pdf",
+          "mode": "list",
+          "cachedResultName": "DHA-Lahore-Byelaws-updated-on-29-Jul-2025.pdf"
+        },
+        "includeDocumentMetadata": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.3,
+      "position": [
+        1152,
+        1056
+      ],
+      "id": "10586cb9-ce09-4f24-b91f-c90d919714ee",
+      "name": "Qdrant Vector Store",
+      "credentials": {
+        "qdrantApi": {
+          "id": "",
+          "name": "QdrantApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Add file to Qdrant Store",
+        "height": 659,
+        "width": 1649,
+        "color": 3
+      },
+      "id": "a0c6a9a2-4023-4255-b396-06dd5a04f060",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Set File ID').item.json.file_id }}",
+          "mode": "id"
+        },
+        "options": {
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "text/plain"
+            }
+          }
+        }
+      },
+      "id": "8e742eab-ddea-4110-896a-dc901d664e68",
+      "name": "Download File",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        352,
+        416
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "10646eae-ae46-4327-a4dc-9987c2d76173",
+              "name": "file_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "f4536df5-d0b1-4392-bf17-b8137fb31a44",
+              "name": "file_type",
+              "value": "={{ $json.mimeType }}",
+              "type": "string"
+            },
+            {
+              "id": "77d782de-169d-4a46-8a8e-a3831c04d90f",
+              "name": "file_title",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "49917bda-c2ef-4c1d-8044-6641b1df7e1a",
+      "name": "Set File ID",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        128,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "id": "9f6e0592-c0a8-4985-a52b-0f5177347e90",
+      "name": "Extract PDF Text",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        608,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "DHA-Lahore-Byelaws-updated-on-29-Jul-2025.pdf",
+        "filter": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        352,
+        176
+      ],
+      "id": "86f5fe12-3e46-47ca-a44f-6862d0d63705",
+      "name": "Search files and folders",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        608,
+        176
+      ],
+      "id": "864bd980-7fca-4ba3-9b03-c02bbb962fac",
+      "name": "Update file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Upload to Locally Hosted Qdrant Vector Store",
+        "height": 544,
+        "width": 768,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        832,
+        64
+      ],
+      "id": "576a1559-2bb2-4eb1-980e-c7bfe458e77a",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        96,
+        176
+      ],
+      "id": "319550d0-77be-4080-9a4c-c1da266ecaa7",
+      "name": "Activate Vector Database Upload Sub-Workflow",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "model": "nomic-embed-text:v1.5"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [
+        928,
+        336
+      ],
+      "id": "6b9bceee-f832-46e6-b75e-73d8029353bc",
+      "name": "Embeddings Uploader",
+      "credentials": {
+        "ollamaApi": {
+          "id": "dIYovo053Hvgpepl",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "={{ $('Set File ID').item.json.file_title }}",
+          "mode": "id"
+        },
+        "embeddingBatchSize": 5,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.3,
+      "position": [
+        1024,
+        128
+      ],
+      "id": "66031f6c-adfd-45ca-842c-9f54466f83f0",
+      "name": "Qdrant Vector Store1",
+      "credentials": {
+        "qdrantApi": {
+          "id": "ANtCtbVwCMgk3Oj8",
+          "name": "QdrantApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## File being processed to Qdrant Vector Store",
+        "height": 544,
+        "width": 736,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        48,
+        64
+      ],
+      "id": "42223430-7794-445d-a500-fbe1a4d56d4f",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# Email RAG Agent",
+        "height": 688,
+        "width": 1648,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        720
+      ],
+      "id": "8c9f0297-0389-4253-8b5a-668c47b7d548",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Get Email from Gmail').item.json.text }}",
+        "options": {
+          "systemMessage": "=<ROLE>\nYou are to a company policy expert who has to answer the asked query FAQ using the provided tools.\n</ROLE>\n\n<OUTPUT>\n- Output should be only email body that can be sent to person asking the question with his name as\n- The email should start with \"Respected {Name of person asking FAQ}\"\n- The email should be respectful and professional.\n- The email should end with \"Regards,\nAdnan Aslam\"\n</OUTPUT>\n\n<TOOLS>\n- Qdrant Vector Store with RAG Agent\n</TOOLS>\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        960,
+        864
+      ],
+      "id": "dc1f9773-181c-4b7e-bbc8-da64e8c92eb6",
+      "name": "Email Reply Drafter"
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $('Get Email from Gmail').item.json.text}}",
+        "categories": {
+          "categories": [
+            {
+              "category": "Customer Support",
+              "description": "Email related to resident asking query about DHA Lahore Byelaws. In this email customer may be asking about any rules, regulations or policies regarding DHA Lahore Byelaws."
+            },
+            {
+              "category": "Other",
+              "description": "Any email that is not Customer Support Category related."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        304,
+        928
+      ],
+      "id": "2e769d86-f250-4d1b-9baa-18a9f6bb45ac",
+      "name": "Is Email a Customer Query ?"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        112,
+        928
+      ],
+      "id": "1a685187-607a-4cc5-9459-d6d333f22636",
+      "name": "Get Email from Gmail",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $('Get Email from Gmail').item.json.id  }}",
+        "emailType": "text",
+        "message": "={{ $('Email Reply Drafter').item.json.output }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1408,
+        864
+      ],
+      "id": "6236c8e9-3351-4f48-8391-160f7294ff1a",
+      "name": "Reply to Customer via Gmail",
+      "webhookId": "d73cecb7-93a9-4d34-b437-fb06c6e85a1c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Get Email",
+        "height": 496,
+        "width": 672,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        64,
+        816
+      ],
+      "id": "9663f451-da97-46d7-a797-3efb9e53868d",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Reply Email Drafting",
+        "height": 608,
+        "width": 800,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        816,
+        768
+      ],
+      "id": "77c3dc64-c2f7-46f6-9e84-3044c8dc36a0",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "model": "nomic-embed-text:v1.5"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        1232
+      ],
+      "id": "a1cdcec5-e5fd-44d6-b236-0faf47d4abb2",
+      "name": "Ollama Embedding Retrieval",
+      "credentials": {
+        "ollamaApi": {
+          "id": "dIYovo053Hvgpepl",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chunkOverlap": 100
+      },
+      "id": "238e6abd-95f7-496e-b4f1-57d2492554ba",
+      "name": "Character Text Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        1216,
+        464
+      ]
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1376,
+        208
+      ],
+      "id": "8951350e-7dfa-4af9-a589-e24ca105f791",
+      "name": "No Operation"
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $json.data || $json.text || $json.concatenated_data }}",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "=file_id",
+                "value": "={{ $('Set File ID').first().json.file_id }}"
+              },
+              {
+                "name": "file_title",
+                "value": "={{ $('Set File ID').first().json.file_title }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "5753e150-5194-48ab-89a8-0b23fd625f42",
+      "name": "Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [
+        1088,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4.1-nano",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        208,
+        1152
+      ],
+      "id": "0237cedd-b1c5-4544-9886-c7be7cd39a58",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4.1-nano",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        880,
+        1168
+      ],
+      "id": "ca3bd84d-37db-45e9-8362-aa22f9c25a8f",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "",
+          "name": "OpenRouter account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Qdrant Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Reply Drafter",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download File": {
+      "main": [
+        [
+          {
+            "node": "Extract PDF Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set File ID": {
+      "main": [
+        [
+          {
+            "node": "Download File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract PDF Text": {
+      "main": [
+        [
+          {
+            "node": "Qdrant Vector Store1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search files and folders": {
+      "main": [
+        [
+          {
+            "node": "Update file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update file": {
+      "main": [
+        [
+          {
+            "node": "Set File ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Activate Vector Database Upload Sub-Workflow": {
+      "main": [
+        [
+          {
+            "node": "Search files and folders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Uploader": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qdrant Vector Store1": {
+      "main": [
+        [
+          {
+            "node": "No Operation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Reply Drafter": {
+      "main": [
+        [
+          {
+            "node": "Reply to Customer via Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Email a Customer Query ?": {
+      "main": [
+        [
+          {
+            "node": "Email Reply Drafter",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Email from Gmail": {
+      "main": [
+        [
+          {
+            "node": "Is Email a Customer Query ?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Embedding Retrieval": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Qdrant Vector Store1",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Is Email a Customer Query ?",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Email Reply Drafter",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "79e7692c-2e75-4f28-bdc2-a6a3de3c603f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "03f590a58500d495fc4092d3a4d6e9499622536c0e114b0ecd19809ff526a72c"
+  },
+  "id": "oL4Ee8z1Rl2XlxK71c67f",
+  "tags": [
+    {
+      "updatedAt": "2026-01-29T18:54:37.990Z",
+      "createdAt": "2026-01-29T18:54:37.990Z",
+      "id": "",
+      "name": "Ready"
+    }
+  ]
+}
